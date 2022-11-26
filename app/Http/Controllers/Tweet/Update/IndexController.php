@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use App\Models\Tweet;
+use App\Services\TweetService;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class IndexController extends Controller
 {
@@ -15,9 +17,12 @@ class IndexController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request, TweetService $tweetService)
     {
         $tweetId = (int) $request->route('tweetId');
+        if (!$tweetService->checkOwnTweet($request->user()->id, $tweetId)) {
+            throw new AccessDeniedHttpException();
+        }
         $tweet = Tweet::where('id',$tweetId)->first();
         $tweet = Tweet::where('id',$tweetId)->firstOrFail(); //例外をスルーしない場合は404 not found
         // if (is_null($tweet)) { //例外をキャッチしない場合は自動的に404 not fount
