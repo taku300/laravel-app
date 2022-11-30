@@ -10,22 +10,22 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\User;
 
-class NewUserIntroduction extends Mailable implements ShouldQueue
+class DailyTweetCount extends Mailable implements shouldQueue
 {
     use Queueable, SerializesModels;
 
-public $subject = '新しいユーザーが追加されました。';
-public User $toUser;
-public User $newUser;
+    public User $toUser;
+    public int $count;
+
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct(User $toUser, User $newUser)
+    public function __construct(User $toUser, int $count)
     {
         $this->toUser = $toUser;
-        $this->newUser = $newUser;
+        $this->count = $count;
     }
 
     /**
@@ -36,7 +36,7 @@ public User $newUser;
     public function envelope()
     {
         return new Envelope(
-            subject: $this->subject,
+            subject: "昨日は{$this->count}件のつぶやきが追加されました！"
         );
     }
 
@@ -48,10 +48,9 @@ public User $newUser;
     public function content()
     {
         return new Content(
-            markdown: 'email.new_user_introduction',
+            markdown: 'email.daily_tweet_count',
         );
     }
-
     /**
      * Get the attachments for the message.
      *
